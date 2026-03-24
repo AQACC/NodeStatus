@@ -16,3 +16,4 @@ captures/
 local.properties
 *.apk
 *.ap_
+rollout-*.jsonl
