@@ -1,0 +1,27 @@
+instance_list:
+  status: planned
+  note: First implementation target for server discovery.
+
+power_state:
+  status: planned
+  note: Expected to be stable across most VirtFusion installations.
+
+traffic_quota:
+  status: planned
+  note: Primary launch metric for quota and remaining traffic.
+
+traffic_usage:
+  status: planned
+  note: Should stay distinct from quota values when fields differ by panel version.
+
+cpu_usage:
+  status: exploratory
+  note: Treat as capability-driven because some sites may not expose live usage.
+
+memory_usage:
+  status: exploratory
+  note: Expect variability by site configuration and panel version.
+
+disk_usage:
+  status: exploratory
+  note: Do not assume every site exposes real-time disk usage.

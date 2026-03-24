@@ -1,0 +1,44 @@
+{
+  "fixtureType": "virtfusion.vmvm.server-overview.synthetic",
+  "source": "synthetic",
+  "collectedAt": "2026-03-24T15:00:00Z",
+  "siteProfile": {
+    "id": "virtfusion.vmvm",
+    "displayName": "vmvm",
+    "baseUrl": "https://panel.example.invalid"
+  },
+  "resources": [
+    {
+      "id": "vm-101",
+      "name": "vmvm-demo-1",
+      "kind": "virtual_machine",
+      "powerState": "running",
+      "limits": {
+        "trafficBytes": 1000000000000,
+        "memoryBytes": 2147483648,
+        "diskBytes": 42949672960
+      },
+      "usage": {
+        "trafficUsedBytes": 250000000000,
+        "cpuPercent": 23.7,
+        "memoryUsedBytes": 1073741824,
+        "diskUsedBytes": 17179869184
+      }
+    },
+    {
+      "id": "vm-202",
+      "name": "vmvm-demo-2",
+      "kind": "virtual_machine",
+      "powerState": "stopped",
+      "limits": {
+        "trafficBytes": 500000000000,
+        "memoryBytes": 1073741824,
+        "diskBytes": 21474836480
+      },
+      "usage": {
+        "trafficUsedBytes": 125000000000,
+        "diskUsedBytes": 8589934592
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+id: virtfusion.vmvm
+family: virtfusion
+displayName: VirtFusion / vmvm
+version: 0.1.0
+supportedAuth:
+  - api_key
+  - web_session
+  - manual_cookie
+capabilities:
+  - instance_list
+  - power_state
+  - traffic_quota
+  - traffic_usage
+  - cpu_usage
+  - memory_usage
+  - disk_usage
+fixtureDirectory: rule-packs/packs/virtfusion.vmvm/fixtures

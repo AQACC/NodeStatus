@@ -1,0 +1,15 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.NodeStatus" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/sky_500</item>
+        <item name="colorOnPrimary">@color/slate_950</item>
+        <item name="colorPrimaryContainer">@color/sky_700</item>
+        <item name="colorOnPrimaryContainer">@color/white</item>
+        <item name="colorSecondary">@color/mint_500</item>
+        <item name="colorOnSecondary">@color/slate_950</item>
+        <item name="colorSurface">@color/slate_950</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="colorOutlineVariant">@color/slate_800</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+</resources>

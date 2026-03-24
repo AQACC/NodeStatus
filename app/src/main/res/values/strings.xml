@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">NodeStatus</string>
+    <string name="foundation_title">NodeStatus foundation build</string>
+    <string name="foundation_summary">This shell is reserved for connection setup and local health checks. Widgets and notifications will remain the primary monitoring surfaces.</string>
+    <string name="foundation_scope_label">First provider family</string>
+    <string name="foundation_card_body">The repository now separates the monitoring model, adapter engine, widget projections, and rule-pack samples so new providers can be added without hardcoding them into the UI.</string>
+</resources>

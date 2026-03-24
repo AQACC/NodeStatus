@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="slate_950">#0F172A</color>
+    <color name="slate_800">#1F2937</color>
+    <color name="slate_200">#E2E8F0</color>
+    <color name="sky_500">#0EA5E9</color>
+    <color name="sky_700">#0369A1</color>
+    <color name="mint_500">#14B8A6</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>
