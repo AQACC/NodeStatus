@@ -1,0 +1,10 @@
+# Copy this file to `local.auth.properties` and fill in your own local auth values.
+# Never commit `local.auth.properties`.
+
+virtfusion.base_url=https://console.vmvm.io
+virtfusion.api_base_url=https://console.vmvm.io/api
+virtfusion.api_token=<paste-api-token>
+virtfusion.cookie_header=XSRF-TOKEN=<paste-url-encoded-cookie-value>; virtfusion_session=<paste-url-encoded-session-cookie>
+virtfusion.x_xsrf_token=<paste-header-token>
+virtfusion.user_agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36 Edg/146.0.0.0
+virtfusion.allow_insecure_tls=false

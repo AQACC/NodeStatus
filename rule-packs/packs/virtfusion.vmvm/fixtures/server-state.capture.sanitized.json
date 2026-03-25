@@ -1,0 +1,66 @@
+{
+  "success": true,
+  "data": {
+    "location": "https://panel.example.invalid/server/11111111-2222-3333-4444-555555555555",
+    "queue": false,
+    "commissioned": 3,
+    "backup_level": 0,
+    "pendingActions": false,
+    "protected": false,
+    "destroyable": true,
+    "state": {
+      "state": "running",
+      "running": true,
+      "memory": {
+        "memtotal": "1982088",
+        "memfree": "1617716",
+        "memavailable": "1706108",
+        "buffers": "55476",
+        "cached": "141616",
+        "sreclaimable": "45796",
+        "_source": "agent_meminfo"
+      },
+      "cpu": 1,
+      "agent": false,
+      "disk": {
+        "vda": {
+          "name": "vda",
+          "rd.reqs": "606057",
+          "rd.bytes": "21172646400",
+          "rd.times": "410728733218",
+          "wr.reqs": "873561",
+          "wr.bytes": "15499561472",
+          "wr.times": "389870947159",
+          "fl.reqs": "23426",
+          "fl.times": "2111883713",
+          "allocation": "5559681024",
+          "capacity": "42949672960",
+          "physical": "5560053760"
+        }
+      },
+      "traffic": {
+        "total": {
+          "rx": 2727862590,
+          "tx": 2453579953,
+          "total": 5181442543,
+          "sql": true
+        },
+        "interfaces": []
+      },
+      "network": {
+        "eth0": {
+          "name": "7977135581",
+          "rx.bytes": "2896675975",
+          "rx.pkts": "8135896",
+          "rx.errs": "0",
+          "rx.drop": "0",
+          "tx.bytes": "2453972302",
+          "tx.pkts": "580871",
+          "tx.errs": "0",
+          "tx.drop": "0"
+        }
+      },
+      "errors": []
+    }
+  }
+}

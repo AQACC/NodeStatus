@@ -36,8 +36,12 @@ android {
 }
 
 dependencies {
+    implementation(project(":adapter:virtfusion"))
+    implementation(project(":core:storage"))
+    implementation(project(":core:widget"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.work.runtime)
     implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

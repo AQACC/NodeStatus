@@ -1,12 +1,16 @@
 # Fixtures for `virtfusion.vmvm`
 
-`server-overview.synthetic.json` is a synthetic sample fixture.
-It exists to validate the first snapshot-mapping pipeline before a real VirtFusion capture is checked in.
+`server-overview.synthetic.json` is the early synthetic sample used to validate the first snapshot pipeline.
 
-When replacing or extending it with real samples, record:
+`server-list.capture.sanitized.json`, `server-state.capture.sanitized.json`, and `server-details.capture.sanitized.json` are sanitized captures based on real `VirtFusion` responses.
+They are the current primary fixtures for the `vmvm` adapter work.
+
+`capture-notes.md` records the request shape without storing live session secrets.
+
+For every future fixture, record:
 
 - where the payload came from
 - what was redacted
 - which capability it validates
 
-Never commit live cookies, tokens, or customer identifiers.
+Sensitive fields such as domains, UUIDs, IP addresses, MAC addresses, cookies, CSRF tokens, and embedded preview payloads must be sanitized before commit.

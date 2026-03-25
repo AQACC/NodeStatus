@@ -34,6 +34,13 @@ The repository is still in the foundation phase. The first validated provider fa
 4. Install Android SDK Platform 36, Build-Tools 36.0.0, Platform-Tools, and Command-line Tools.
 5. Prefer a real device for widget, notification, and WebView validation.
 
+## Local session auth
+
+For local `VirtFusion` session-backed development, copy
+`local.auth.properties.example` to `local.auth.properties` and keep it untracked.
+See [docs/local-session-auth.md](docs/local-session-auth.md) and
+[docs/real-request-auth.md](docs/real-request-auth.md).
+
 ## Baseline commands
 
 Windows:

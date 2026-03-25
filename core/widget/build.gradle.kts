@@ -8,5 +8,6 @@ kotlin {
 
 dependencies {
     api(project(":core:model"))
+    api(project(":core:storage"))
     testImplementation(libs.junit)
 }

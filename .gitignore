@@ -3,6 +3,7 @@
 .gradle
 .gradle-home
 .kotlin
+.idea/
 .idea/caches
 .idea/libraries
 .idea/modules.xml
@@ -14,6 +15,7 @@
 **/build/
 captures/
 local.properties
+local.auth.properties
 *.apk
 *.ap_
 rollout-*.jsonl

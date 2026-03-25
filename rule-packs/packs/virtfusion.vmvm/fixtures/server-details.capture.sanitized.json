@@ -1,0 +1,129 @@
+{
+  "success": true,
+  "trafficExceeded": false,
+  "data": {
+    "name": "VMVM",
+    "hostname": null,
+    "commissioned": 3,
+    "uuid": "11111111-2222-3333-4444-555555555555",
+    "created": "2026-03-23T02:09:14.000000Z",
+    "state": "complete",
+    "rebuild": 0,
+    "protected": false,
+    "destroyable": true,
+    "suspended": false,
+    "build_fail": 0,
+    "backup_level": 0,
+    "rescue": 0,
+    "architecture": 1,
+    "timezone": "Asia/Tokyo",
+    "backupable": true,
+    "backup_plan": null,
+    "os": {
+      "dist": "debian",
+      "name": "Debian GNU/Linux 13 (trixie)",
+      "kernel": "6.12.38+deb13-amd64",
+      "screen": "<redacted-base64-preview>",
+      "type": null,
+      "img": "debian_logo",
+      "updated": "2026-03-24T12:10:41.000000Z"
+    },
+    "server_info": {
+      "show": false,
+      "icon": null,
+      "name": null,
+      "label": null
+    },
+    "resourcePack": false,
+    "vnc": {
+      "expose_details": true,
+      "ip": "203.0.113.41",
+      "hostname": null,
+      "port": 5941,
+      "enabled": 0
+    },
+    "host": null,
+    "resources": {
+      "memory": 2048,
+      "storage": 40,
+      "traffic": 500,
+      "cpu_cores": 2,
+      "cpu_model": null
+    },
+    "storage": [
+      {
+        "id": 192,
+        "status": 3,
+        "drive": "A",
+        "tooltip": "Disable",
+        "primary": true,
+        "enabled": true,
+        "enabled_current": true,
+        "size": 40,
+        "saving": false
+      }
+    ],
+    "assets": [],
+    "network": {
+      "interfaces": [
+        {
+          "id": 192,
+          "order": 1,
+          "enabled": true,
+          "tag": 7977135581,
+          "name": "eth0",
+          "mac": "02:00:00:00:00:40",
+          "ipv4ToMac": null,
+          "ipv6ToMac": null,
+          "dhcpV4": false,
+          "dhcpV6": false,
+          "in_average": 37500,
+          "in_peak": 0,
+          "in_burst": 0,
+          "out_average": 37500,
+          "out_peak": 0,
+          "out_burst": 0,
+          "ipv4_resolver_1": 1,
+          "ipv4_resolver_2": 2,
+          "ipv6_resolver_1": 1,
+          "ipv6_resolver_2": 2,
+          "isNat": false,
+          "ipv4": [
+            {
+              "id": 226,
+              "order": 1,
+              "enabled": true,
+              "address": "203.0.113.170",
+              "gateway": "203.0.113.254",
+              "netmask": "255.255.255.128",
+              "resolver_1": "8.8.8.8",
+              "resolver_2": "1.1.1.1",
+              "resolver_1_original": "8.8.8.8",
+              "resolver_2_original": "1.1.1.1",
+              "rdns_type": 0,
+              "rdns": null
+            }
+          ],
+          "ipv6": []
+        }
+      ]
+    },
+    "config": {
+      "uefi": 0,
+      "autoConfig": true,
+      "boot_order": 1
+    },
+    "media": {
+      "iso_mounted": false,
+      "iso_type": "local",
+      "iso_name": "",
+      "iso_url": null
+    },
+    "traffic": {
+      "countMethod": 3,
+      "start": "2026-03-23T00:00:00.000000Z",
+      "end": "2026-04-22T23:59:59.999999Z",
+      "limit": 500
+    }
+  }
+}
