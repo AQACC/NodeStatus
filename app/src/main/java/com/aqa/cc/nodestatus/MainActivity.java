@@ -1,6 +1,7 @@
 package com.aqa.cc.nodestatus;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -55,6 +56,10 @@ public class MainActivity extends AppCompatActivity {
     private TextView memoryTrendValue;
     private TextView memoryTrendDelta;
     private TextView historyListValue;
+    private TextView metricPowerValue;
+    private TextView metricTrafficValue;
+    private TextView metricMemoryValue;
+    private TextView metricDiskValue;
     private TrendLineView trafficTrendView;
     private TrendLineView memoryTrendView;
     private Spinner serverSelector;
@@ -69,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
     private MaterialSwitch notificationsEnabledSwitch;
     private EditText trafficThresholdInput;
     private Button refreshButton;
+    private Button openHistoryDetailButton;
     private LinearLayout dashboardSection;
     private LinearLayout settingsSection;
     private List<WidgetSummary> currentSummaries = Collections.emptyList();
@@ -95,6 +101,10 @@ public class MainActivity extends AppCompatActivity {
         memoryTrendValue = findViewById(R.id.memoryTrendValue);
         memoryTrendDelta = findViewById(R.id.memoryTrendDelta);
         historyListValue = findViewById(R.id.historyListValue);
+        metricPowerValue = findViewById(R.id.metricPowerValue);
+        metricTrafficValue = findViewById(R.id.metricTrafficValue);
+        metricMemoryValue = findViewById(R.id.metricMemoryValue);
+        metricDiskValue = findViewById(R.id.metricDiskValue);
         trafficTrendView = findViewById(R.id.trafficTrendView);
         memoryTrendView = findViewById(R.id.memoryTrendView);
         serverSelector = findViewById(R.id.serverSelector);
@@ -108,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
         notificationsEnabledSwitch = findViewById(R.id.notificationsEnabledSwitch);
         trafficThresholdInput = findViewById(R.id.trafficThresholdInput);
         refreshButton = findViewById(R.id.refreshButton);
+        openHistoryDetailButton = findViewById(R.id.openHistoryDetailButton);
         dashboardSection = findViewById(R.id.dashboardSection);
         settingsSection = findViewById(R.id.settingsSection);
 
@@ -122,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
         NodeStatusRefreshCoordinator.schedulePeriodicRefresh(this, sessionConfigStore.load());
 
         refreshButton.setOnClickListener(view -> triggerManualRefresh());
+        openHistoryDetailButton.setOnClickListener(view -> openHistoryDetail());
     }
 
     @Override
@@ -369,8 +381,25 @@ public class MainActivity extends AppCompatActivity {
                     .append(metric.getValueText());
         }
         snapshotHighlightsValue.setText(highlightText.toString());
+        renderMetricOverview(summary);
         renderTrendCards(summary.getResourceId());
         renderHistory(summary.getResourceId());
+    }
+
+    private void renderMetricOverview(WidgetSummary summary) {
+        metricPowerValue.setText(findHighlight(summary, "state.power"));
+        metricTrafficValue.setText(findHighlight(summary, "usage.traffic_total_bytes"));
+        metricMemoryValue.setText(findHighlight(summary, "usage.memory_used_bytes"));
+        metricDiskValue.setText(findHighlight(summary, "usage.disk_used_bytes"));
+    }
+
+    private String findHighlight(WidgetSummary summary, String key) {
+        for (WidgetMetric metric : summary.getHighlights()) {
+            if (key.equals(metric.getKey())) {
+                return metric.getValueText();
+            }
+        }
+        return "n/a";
     }
 
     private void renderTrendCards(@Nullable String resourceId) {
@@ -524,5 +553,13 @@ public class MainActivity extends AppCompatActivity {
                 new String[]{Manifest.permission.POST_NOTIFICATIONS},
                 1001
         );
+    }
+
+    private void openHistoryDetail() {
+        WidgetSummary summary = resolveSelectedSummary();
+        Intent intent = new Intent(this, HistoryDetailActivity.class);
+        intent.putExtra(HistoryDetailActivity.EXTRA_RESOURCE_ID, summary.getResourceId());
+        intent.putExtra(HistoryDetailActivity.EXTRA_DISPLAY_NAME, summary.getDisplayName());
+        startActivity(intent);
     }
 }

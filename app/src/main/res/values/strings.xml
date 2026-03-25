@@ -7,8 +7,17 @@
     <string name="foundation_scope_label">First provider family</string>
     <string name="foundation_card_body">The repository now separates the monitoring model, adapter engine, widget projections, snapshot storage, and rule-pack samples so new providers can be added without hardcoding them into the UI.</string>
     <string name="snapshot_card_title">Local snapshot preview</string>
+    <string name="metric_overview_title">Current metrics</string>
+    <string name="metric_power_label">Power</string>
+    <string name="metric_traffic_label">Traffic</string>
+    <string name="metric_memory_label">Memory</string>
+    <string name="metric_disk_label">Disk</string>
     <string name="server_switcher_title">Server switcher</string>
     <string name="history_card_title">Recent history</string>
+    <string name="history_detail_button">Open full history</string>
+    <string name="history_detail_title">History detail</string>
+    <string name="history_detail_subtitle">Server: %1$s</string>
+    <string name="history_detail_empty">No detailed history is available for this server yet.</string>
     <string name="trend_card_title">Recent trend</string>
     <string name="status_card_title">Refresh status</string>
     <string name="trend_empty_value">No history yet</string>
