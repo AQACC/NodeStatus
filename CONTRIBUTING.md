@@ -38,6 +38,11 @@ Rule-pack contributions:
 - Use short-lived feature branches.
 - Keep commits atomic and reversible.
 - Prefer descriptive commit messages over large mixed commits.
+- Sign off every commit (DCO):
+
+```text
+git commit -s
+```
 
 ## Out of scope for community plugins
 

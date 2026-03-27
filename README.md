@@ -67,6 +67,7 @@ macOS/Linux:
 This repository is licensed under the [MIT License](LICENSE).
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md),
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), [GOVERNANCE.md](GOVERNANCE.md),
 [docs/architecture.md](docs/architecture.md), [docs/rule-pack-format.md](docs/rule-pack-format.md),
 and [docs/license-selection.md](docs/license-selection.md)
 before opening a pull request.
