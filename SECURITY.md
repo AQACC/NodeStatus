@@ -13,7 +13,15 @@ This project is pre-1.0 and under active design. Security-sensitive areas alread
 ## Reporting
 
 If you discover a security issue, do not open a public issue with exploit details.
-Send a private report to the project maintainer first, including:
+Send a private report through GitHub Security Advisories:
+
+https://github.com/aqacc/NodeStatus/security/advisories/new
+
+If the final repository name differs from `NodeStatus`, update this advisory URL
+and `.github/ISSUE_TEMPLATE/config.yml` together.
+
+If the Security tab is not enabled yet, contact the maintainer via their GitHub
+profile and request a private channel. Include:
 
 - affected area
 - reproduction steps

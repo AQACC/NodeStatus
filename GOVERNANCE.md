@@ -19,6 +19,18 @@ while the architecture and provider contract are still stabilizing.
   discussed in an issue before implementation.
 - When consensus is unclear, the maintainer makes the final decision.
 
+## Repository Settings
+
+These settings are enforced in GitHub repository configuration rather than in
+source files.
+
+- Require pull requests for `main`.
+- Require status checks for Android CI, DCO, and Secret Scan.
+- Require at least one approving review.
+- Disallow force pushes and branch deletions on `main`.
+
+See [docs/repository-setup.md](docs/repository-setup.md) for the exact checklist.
+
 ## Contribution Policy
 
 - All commits in pull requests must include a DCO sign-off
@@ -39,5 +51,6 @@ while the architecture and provider contract are still stabilizing.
 
 - `main` is the primary integration branch.
 - Releases before 1.0 may include breaking changes without deprecation windows.
+- Keep `CHANGELOG.md` updated before tagging a release.
 - Compatibility guarantees will be defined when the project reaches a stable
   provider contract.

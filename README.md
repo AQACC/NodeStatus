@@ -1,5 +1,8 @@
 # NodeStatus
 
+![Android CI](https://github.com/aqacc/NodeStatus/actions/workflows/android.yml/badge.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+
 NodeStatus is an Android configuration center for panel-based infrastructure monitoring.
 The long-term goal is to support multiple hosting panels through reviewed rule packs,
 then surface the resulting snapshots through widgets, notifications, and compact app flows.
@@ -29,7 +32,7 @@ The repository is still in the foundation phase. The first validated provider fa
 ## Local setup
 
 1. Install Android Studio stable on Windows.
-2. Open `D:\Achieve\Code\Android\NodeStatus`.
+2. Open the project root in Android Studio.
 3. Use JDK 17 for Gradle in Android Studio, even if newer JDKs are installed on the machine.
 4. Install Android SDK Platform 36, Build-Tools 36.0.0, Platform-Tools, and Command-line Tools.
 5. Prefer a real device for widget, notification, and WebView validation.
@@ -62,6 +65,42 @@ macOS/Linux:
 - Widget and notification surfaces must read cached snapshots, not direct network calls.
 - Community contributions should favor declarative rule packs over runtime-executed third-party code.
 
+## CI notes
+
+CI currently targets Android SDK 36 and AGP 9.1 because the local baseline build
+passes with that pair.
+
+If GitHub runners fail to fetch those packages or fail in Gradle plugin
+resolution, downgrade the SDK and AGP together to the most recent stable pair
+and update both `gradle/libs.versions.toml` and `.github/workflows/android.yml`.
+
+## FAQ
+
+**Why is this pre-1.0?**
+The provider contract and rule-pack boundaries are still stabilizing, so
+breaking changes can happen between releases.
+
+**How do I add a new provider?**
+Start with a rule pack under `rule-packs/`, add sanitized fixtures, and open
+an issue before touching the core model.
+
+**Where should credentials live during development?**
+Use `local.auth.properties` and keep it untracked. Do not commit live cookies
+or API tokens.
+
+## Roadmap
+
+- Finish the stable provider contract and rule-pack schema.
+- Harden local snapshot storage and retention.
+- Expand rule-pack samples and fixtures.
+- Ship a minimal onboarding flow for session-backed providers.
+
+## Maintainer Notes
+
+See [CHANGELOG.md](CHANGELOG.md) for release history and
+[docs/repository-setup.md](docs/repository-setup.md) for first-push,
+branch-protection, and security setup steps.
+
 ## License
 
 This repository is licensed under the [MIT License](LICENSE).
@@ -69,5 +108,6 @@ This repository is licensed under the [MIT License](LICENSE).
 Read [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md),
 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), [GOVERNANCE.md](GOVERNANCE.md),
 [docs/architecture.md](docs/architecture.md), [docs/rule-pack-format.md](docs/rule-pack-format.md),
-and [docs/license-selection.md](docs/license-selection.md)
+[docs/license-selection.md](docs/license-selection.md), and
+[docs/repository-setup.md](docs/repository-setup.md)
 before opening a pull request.
