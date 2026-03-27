@@ -47,13 +47,17 @@ class FileSnapshotStoreTest {
                     collectedAt = collectedAt,
                 ),
             ),
+            siteId = "site-1",
+            siteDisplayName = "Tokyo VirtFusion",
         )
 
         store.save(snapshot)
 
-        val restored = store.find("server-1")
+        val restored = store.find("site-1::server-1")
         assertNotNull(restored)
         assertEquals("VMVM", restored?.displayName)
+        assertEquals("site-1", restored?.siteId)
+        assertEquals("Tokyo VirtFusion", restored?.siteDisplayName)
         assertEquals(2, restored?.metrics?.size)
         assertEquals("running", restored?.metrics?.first()?.value?.raw)
         assertEquals("123", restored?.metrics?.last()?.value?.raw)

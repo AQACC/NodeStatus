@@ -1,21 +1,9 @@
 package com.aqa.cc.nodestatus.core.storage
 
-import com.aqa.cc.nodestatus.core.model.Freshness
-import com.aqa.cc.nodestatus.core.model.Metric
-import com.aqa.cc.nodestatus.core.model.MetricValue
-import com.aqa.cc.nodestatus.core.model.MetricValueType
-import com.aqa.cc.nodestatus.core.model.ProviderFamily
-import com.aqa.cc.nodestatus.core.model.ResourceKind
 import com.aqa.cc.nodestatus.core.model.ResourceSnapshot
-import java.io.Reader
-import java.io.Writer
-import java.nio.file.Files
-import java.nio.file.Path
-import java.time.Instant
-import java.util.Properties
 
 class FileSnapshotStore(
-    private val path: Path,
+    private val path: java.nio.file.Path,
 ) : SnapshotStore {
     override fun save(snapshot: ResourceSnapshot) {
         saveAll(listOf(snapshot))
@@ -26,9 +14,16 @@ class FileSnapshotStore(
     }
 
     override fun find(resourceId: String): ResourceSnapshot? =
-        listLatest().firstOrNull { it.resourceId == resourceId }
+        listLatest().firstOrNull { matchesRequestedResource(it, resourceId) }
 
     override fun listLatest(): List<ResourceSnapshot> {
         return SnapshotFileCodec.read(path)
     }
+}
+
+private fun matchesRequestedResource(snapshot: ResourceSnapshot, requestedResourceId: String): Boolean {
+    if (snapshot.scopedResourceId == requestedResourceId || snapshot.resourceId == requestedResourceId) {
+        return true
+    }
+    return snapshot.siteId.isBlank() && requestedResourceId.endsWith("::${snapshot.resourceId}")
 }

@@ -4,7 +4,6 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
-import com.aqa.cc.nodestatus.core.model.Metric;
 import com.aqa.cc.nodestatus.core.model.ResourceSnapshot;
 import com.aqa.cc.nodestatus.core.storage.FileSnapshotHistoryStore;
 
@@ -35,7 +34,7 @@ public final class SnapshotTrendAnalyzer {
     private TrendCardData buildTrend(List<ResourceSnapshot> history, String key, boolean bytes) {
         List<Long> samples = new ArrayList<>();
         for (ResourceSnapshot snapshot : history) {
-            Long metricValue = findMetricLong(snapshot, key);
+            Long metricValue = SnapshotTextFormatter.findMetricLong(snapshot, key);
             if (metricValue != null) {
                 samples.add(metricValue);
             }
@@ -48,14 +47,14 @@ public final class SnapshotTrendAnalyzer {
         long current = samples.get(samples.size() - 1);
         long first = samples.get(0);
         long delta = current - first;
-        String currentLabel = bytes ? formatBytes(current) : String.valueOf(current);
+        String currentLabel = bytes ? SnapshotTextFormatter.formatBytes(current) : String.valueOf(current);
         String deltaLabel;
         if (delta == 0L) {
             deltaLabel = "No change across the stored samples.";
         } else if (delta > 0L) {
-            deltaLabel = "Up " + (bytes ? formatBytes(delta) : delta) + " vs first sample";
+            deltaLabel = "Up " + (bytes ? SnapshotTextFormatter.formatBytes(delta) : delta) + " vs first sample";
         } else {
-            deltaLabel = "Down " + (bytes ? formatBytes(Math.abs(delta)) : Math.abs(delta)) + " vs first sample";
+            deltaLabel = "Down " + (bytes ? SnapshotTextFormatter.formatBytes(Math.abs(delta)) : Math.abs(delta)) + " vs first sample";
         }
 
         float[] series = new float[samples.size()];
@@ -63,36 +62,6 @@ public final class SnapshotTrendAnalyzer {
             series[index] = samples.get(index);
         }
         return new TrendCardData(currentLabel, deltaLabel, series);
-    }
-
-    private Long findMetricLong(ResourceSnapshot snapshot, String key) {
-        for (Metric metric : snapshot.getMetrics()) {
-            if (key.equals(metric.getKey()) && metric.getValue() != null) {
-                try {
-                    return Long.parseLong(metric.getValue().getRaw());
-                } catch (NumberFormatException ignored) {
-                    return null;
-                }
-            }
-        }
-        return null;
-    }
-
-    private String formatBytes(long bytes) {
-        if (bytes < 1024L) {
-            return bytes + " B";
-        }
-        String[] units = {"KB", "MB", "GB", "TB"};
-        double value = bytes;
-        int unitIndex = -1;
-        while (value >= 1024.0 && unitIndex < units.length - 1) {
-            value /= 1024.0;
-            unitIndex += 1;
-        }
-        if (value >= 100 || value % 1.0 == 0.0) {
-            return ((int) value) + " " + units[unitIndex];
-        }
-        return String.format(java.util.Locale.US, "%.1f %s", value, units[unitIndex]);
     }
 
     public static final class TrendBundle {

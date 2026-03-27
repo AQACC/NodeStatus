@@ -26,9 +26,15 @@ class SnapshotWidgetDataSourceTest {
                 metric("quota.cpu_cores", "CPU cores", "2", MetricValueType.INTEGER, "cores", collectedAt),
                 metric("state.power", "Power state", "running", MetricValueType.TEXT, null, collectedAt),
                 metric("usage.traffic_remaining_bytes", "Traffic remaining", "536870912000", MetricValueType.INTEGER, "bytes", collectedAt),
+                metric("usage.traffic_total_bytes", "Traffic total", "537870912000", MetricValueType.INTEGER, "bytes", collectedAt),
+                metric("state.cpu", "CPU load", "23.7", MetricValueType.DECIMAL, "percent", collectedAt),
+                metric("quota.memory_bytes", "Memory quota", "2147483648", MetricValueType.INTEGER, "bytes", collectedAt),
                 metric("usage.memory_used_bytes", "Memory used", "280592384", MetricValueType.INTEGER, "bytes", collectedAt),
+                metric("quota.disk_bytes", "Disk quota", "42949672960", MetricValueType.INTEGER, "bytes", collectedAt),
                 metric("usage.disk_used_bytes", "Disk used", "5559681024", MetricValueType.INTEGER, "bytes", collectedAt),
             ),
+            siteId = "site-1",
+            siteDisplayName = "Tokyo VirtFusion",
         )
         val store = object : SnapshotStore {
             override fun save(snapshot: ResourceSnapshot) = Unit
@@ -40,9 +46,17 @@ class SnapshotWidgetDataSourceTest {
         val summary = SnapshotWidgetDataSource(store).loadSummaries(limit = 1).single()
 
         assertEquals("VMVM", summary.displayName)
+        assertEquals("site-1::server-1", summary.scopedResourceId)
+        assertEquals("Tokyo VirtFusion", summary.siteDisplayName)
+        assertEquals(4, summary.highlights.size)
         assertEquals("state.power", summary.highlights[0].key)
         assertEquals("running", summary.highlights[0].valueText)
+        assertEquals("usage.traffic_remaining_bytes", summary.highlights[1].key)
         assertEquals("500 GB", summary.highlights[1].valueText)
+        assertEquals("state.cpu", summary.highlights[2].key)
+        assertEquals("23.7%", summary.highlights[2].valueText)
+        assertEquals("usage.memory_used_bytes", summary.highlights[3].key)
+        assertEquals("267 MB / 2 GB (13.1%)", summary.highlights[3].valueText)
     }
 
     private fun metric(

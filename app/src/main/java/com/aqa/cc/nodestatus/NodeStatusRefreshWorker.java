@@ -6,6 +6,8 @@ import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import com.aqa.cc.nodestatus.core.model.SiteProfile;
+
 public class NodeStatusRefreshWorker extends Worker {
     public NodeStatusRefreshWorker(@NonNull Context context, @NonNull WorkerParameters params) {
         super(context, params);
@@ -14,17 +16,18 @@ public class NodeStatusRefreshWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        VirtFusionSessionConfig config = new VirtFusionSessionConfigStore(getApplicationContext()).load();
-        if (config.getBaseUrl().isEmpty()) {
-            return Result.success();
-        }
-        if (!config.hasApiToken() && !config.hasCompatibilitySession()) {
+        ActiveSiteSessionRepository siteSessionRepository = new ActiveSiteSessionRepository(getApplicationContext());
+        SiteProfile activeSite = siteSessionRepository.loadActiveSite();
+        ProviderSessionConfig config = siteSessionRepository.loadActiveConfig();
+        NodeStatusRefreshCoordinator.reconcileRefreshWork(getApplicationContext(), config);
+        if (!config.hasRunnableAuth()) {
             return Result.success();
         }
 
         try {
             NodeStatusRefreshCoordinator.refresh(
                     getApplicationContext(),
+                    activeSite,
                     config,
                     NodeStatusRefreshCoordinator.SOURCE_WORKER
             );
@@ -37,10 +40,13 @@ public class NodeStatusRefreshWorker extends Worker {
             new NodeStatusRefreshStatusStore(getApplicationContext()).saveFailure(
                     NodeStatusRefreshCoordinator.SOURCE_WORKER,
                     message,
-                    java.time.Instant.now().toString()
+                    java.time.Instant.now().toString(),
+                    RefreshDebugLogComposer.formatThrowable(throwable)
             );
             NodeStatusWidgetProvider.refreshAll(getApplicationContext());
-            return Result.retry();
+            return NodeStatusRefreshFailurePolicy.classify(throwable) == NodeStatusRefreshFailurePolicy.Disposition.RETRY
+                    ? Result.retry()
+                    : Result.failure();
         }
     }
 }

@@ -5,7 +5,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -28,7 +27,7 @@ public final class NodeStatusNotificationHelper {
 
     public static void maybeNotifyLowTraffic(
             Context context,
-            VirtFusionSessionConfig config,
+            ProviderRefreshConfig config,
             List<ResourceSnapshot> snapshots
     ) {
         if (!config.isNotificationsEnabled()) {
@@ -47,14 +46,15 @@ public final class NodeStatusNotificationHelper {
                 continue;
             }
 
+            String alertKey = snapshot.getScopedResourceId();
             boolean belowThreshold = remainingPercent <= config.getLowTrafficThresholdPercent();
             boolean wasBelowThreshold = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                    .getBoolean(snapshot.getResourceId(), false);
+                    .getBoolean(alertKey, false);
 
             if (belowThreshold && !wasBelowThreshold) {
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                         .setSmallIcon(android.R.drawable.stat_notify_error)
-                        .setContentTitle(snapshot.getDisplayName())
+                        .setContentTitle(buildNotificationTitle(snapshot))
                         .setContentText(
                                 context.getString(
                                         R.string.notification_low_traffic_body,
@@ -65,12 +65,12 @@ public final class NodeStatusNotificationHelper {
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         .setAutoCancel(true);
 
-                NotificationManagerCompat.from(context).notify(snapshot.getResourceId().hashCode(), builder.build());
+                NotificationManagerCompat.from(context).notify(alertKey.hashCode(), builder.build());
             }
 
             context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                     .edit()
-                    .putBoolean(snapshot.getResourceId(), belowThreshold)
+                    .putBoolean(alertKey, belowThreshold)
                     .apply();
         }
     }
@@ -111,11 +111,14 @@ public final class NodeStatusNotificationHelper {
         }
     }
 
-    private static void ensureChannel(Context context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            return;
+    private static String buildNotificationTitle(ResourceSnapshot snapshot) {
+        if (snapshot.getSiteDisplayName() == null || snapshot.getSiteDisplayName().isBlank()) {
+            return snapshot.getDisplayName();
         }
+        return snapshot.getSiteDisplayName() + " / " + snapshot.getDisplayName();
+    }
 
+    private static void ensureChannel(Context context) {
         NotificationManager manager = context.getSystemService(NotificationManager.class);
         if (manager.getNotificationChannel(CHANNEL_ID) != null) {
             return;

@@ -13,7 +13,6 @@ object VirtFusionVmvmBlueprint : PanelAdapterBlueprint {
         displayName = "VirtFusion / vmvm",
         version = "0.1.0",
         supportedAuth = setOf(
-            AuthMethod.API_KEY,
             AuthMethod.WEB_SESSION,
             AuthMethod.MANUAL_COOKIE,
         ),
@@ -29,3 +28,4 @@ object VirtFusionVmvmBlueprint : PanelAdapterBlueprint {
         fixtureDirectory = "rule-packs/packs/virtfusion.vmvm/fixtures",
     )
 }
+

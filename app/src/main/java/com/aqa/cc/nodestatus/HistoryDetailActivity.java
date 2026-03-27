@@ -1,6 +1,7 @@
 package com.aqa.cc.nodestatus;
 
 import android.os.Bundle;
+import android.graphics.drawable.GradientDrawable;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -8,12 +9,11 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.aqa.cc.nodestatus.core.model.Metric;
 import com.aqa.cc.nodestatus.core.model.ResourceSnapshot;
 import com.aqa.cc.nodestatus.core.storage.FileSnapshotHistoryStore;
+import com.google.android.material.color.MaterialColors;
 
 import java.util.List;
-import java.util.Locale;
 
 public class HistoryDetailActivity extends AppCompatActivity {
     public static final String EXTRA_RESOURCE_ID = "resource_id";
@@ -43,6 +43,7 @@ public class HistoryDetailActivity extends AppCompatActivity {
         trafficTrendView = findViewById(R.id.historyDetailTrafficTrendView);
         memoryTrendView = findViewById(R.id.historyDetailMemoryTrendView);
         historyTimelineContainer = findViewById(R.id.historyDetailTimelineContainer);
+        findViewById(R.id.historyBackButton).setOnClickListener(view -> finish());
 
         String resourceId = getIntent().getStringExtra(EXTRA_RESOURCE_ID);
         String displayName = getIntent().getStringExtra(EXTRA_DISPLAY_NAME);
@@ -93,103 +94,84 @@ public class HistoryDetailActivity extends AppCompatActivity {
     private View createEmptyMessageView() {
         TextView textView = new TextView(this);
         textView.setText(R.string.history_detail_empty);
-        textView.setTextColor(android.graphics.Color.parseColor("#475569"));
+        textView.setTextColor(themeColor(com.google.android.material.R.attr.colorOnSurfaceVariant, R.color.ink_500));
         textView.setTextSize(14);
+        textView.setPadding(0, 8, 0, 0);
         return textView;
     }
 
     private View createTimelineItem(ResourceSnapshot snapshot, boolean addTopSpacing) {
         LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setOrientation(LinearLayout.VERTICAL);
         if (addTopSpacing) {
             row.setPadding(0, 16, 0, 0);
         }
 
-        View marker = new View(this);
-        LinearLayout.LayoutParams markerParams = new LinearLayout.LayoutParams(18, 18);
-        markerParams.topMargin = 8;
-        marker.setLayoutParams(markerParams);
-        marker.setBackgroundColor(android.graphics.Color.parseColor("#0EA5E9"));
-
         LinearLayout content = new LinearLayout(this);
         content.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams contentParams = new LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        contentParams.leftMargin = 16;
         content.setLayoutParams(contentParams);
-        content.setPadding(20, 18, 20, 18);
-        content.setBackgroundColor(android.graphics.Color.parseColor("#F8FAFC"));
+        content.setPadding(dp(18), dp(18), dp(18), dp(18));
+        content.setBackground(createCardBackground());
 
         TextView timestamp = new TextView(this);
-        timestamp.setText(snapshot.getCollectedAt().toString());
-        timestamp.setTextColor(android.graphics.Color.parseColor("#0369A1"));
+        timestamp.setText(SnapshotTextFormatter.formatInstant(snapshot.getCollectedAt()));
+        timestamp.setTextColor(themeColor(androidx.appcompat.R.attr.colorPrimary, R.color.teal_700));
         timestamp.setTextSize(13);
+        timestamp.setBackground(createBadgeBackground());
+        timestamp.setPadding(dp(12), dp(6), dp(12), dp(6));
 
         TextView values = new TextView(this);
-        values.setText(
-                "Power: " + findMetricText(snapshot, "state.power", "n/a") + "\n" +
-                        "Traffic: " + formatMetricBytes(snapshot, "usage.traffic_total_bytes") + "\n" +
-                        "Memory: " + formatMetricBytes(snapshot, "usage.memory_used_bytes") + "\n" +
-                        "Disk: " + formatMetricBytes(snapshot, "usage.disk_used_bytes")
-        );
-        values.setTextColor(android.graphics.Color.parseColor("#0F172A"));
+        values.setText(getString(
+                R.string.history_timeline_metrics,
+                SnapshotTextFormatter.findMetricText(snapshot, "state.power", "n/a"),
+                SnapshotTextFormatter.formatMetricBytes(snapshot, "usage.traffic_total_bytes"),
+                SnapshotTextFormatter.formatMetricBytes(snapshot, "usage.memory_used_bytes"),
+                SnapshotTextFormatter.formatMetricBytes(snapshot, "usage.disk_used_bytes")
+        ));
+        values.setTextColor(themeColor(com.google.android.material.R.attr.colorOnSurface, R.color.ink_950));
         values.setTextSize(15);
         values.setPadding(0, 8, 0, 0);
 
         TextView meta = new TextView(this);
-        meta.setText("Source hint: " + findMetricText(snapshot, "meta.primary_ipv4", "stored snapshot"));
-        meta.setTextColor(android.graphics.Color.parseColor("#475569"));
+        meta.setText(getString(
+                R.string.history_source_hint,
+                SnapshotTextFormatter.findMetricText(snapshot, "meta.primary_ipv4", "stored snapshot")
+        ));
+        meta.setTextColor(themeColor(com.google.android.material.R.attr.colorOnSurfaceVariant, R.color.ink_500));
         meta.setTextSize(13);
         meta.setPadding(0, 10, 0, 0);
 
         content.addView(timestamp);
         content.addView(values);
         content.addView(meta);
-
-        row.addView(marker);
         row.addView(content);
         return row;
     }
 
-    private String findMetricText(ResourceSnapshot snapshot, String key, String fallback) {
-        for (Metric metric : snapshot.getMetrics()) {
-            if (key.equals(metric.getKey()) && metric.getValue() != null) {
-                return metric.getValue().getRaw();
-            }
-        }
-        return fallback;
+    private GradientDrawable createCardBackground() {
+        GradientDrawable drawable = new GradientDrawable();
+        drawable.setColor(themeColor(com.google.android.material.R.attr.colorSurface, R.color.paper_50));
+        drawable.setCornerRadius(dp(26));
+        drawable.setStroke(dp(1), themeColor(com.google.android.material.R.attr.colorOutlineVariant, R.color.mist_200));
+        return drawable;
     }
 
-    private String formatMetricBytes(ResourceSnapshot snapshot, String key) {
-        for (Metric metric : snapshot.getMetrics()) {
-            if (key.equals(metric.getKey()) && metric.getValue() != null) {
-                try {
-                    return formatBytes(Long.parseLong(metric.getValue().getRaw()));
-                } catch (NumberFormatException ignored) {
-                    return metric.getValue().getRaw();
-                }
-            }
-        }
-        return "n/a";
+    private GradientDrawable createBadgeBackground() {
+        GradientDrawable drawable = new GradientDrawable();
+        drawable.setColor(themeColor(com.google.android.material.R.attr.colorSurfaceContainer, R.color.paper_100));
+        drawable.setCornerRadius(dp(999));
+        return drawable;
     }
 
-    private String formatBytes(long bytes) {
-        if (bytes < 1024L) {
-            return bytes + " B";
-        }
-        String[] units = {"KB", "MB", "GB", "TB"};
-        double value = bytes;
-        int unitIndex = -1;
-        while (value >= 1024.0 && unitIndex < units.length - 1) {
-            value /= 1024.0;
-            unitIndex += 1;
-        }
-        if (value >= 100 || value % 1.0 == 0.0) {
-            return ((int) value) + " " + units[unitIndex];
-        }
-        return String.format(Locale.US, "%.1f %s", value, units[unitIndex]);
+    private int themeColor(int attrResId, int fallbackResId) {
+        return MaterialColors.getColor(this, attrResId, getColor(fallbackResId));
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 }

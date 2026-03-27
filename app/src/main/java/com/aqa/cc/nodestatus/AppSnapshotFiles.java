@@ -15,4 +15,12 @@ public final class AppSnapshotFiles {
     public static Path historySnapshotPath(Context context) {
         return Path.of(context.getFilesDir().getAbsolutePath(), "history-snapshots.properties");
     }
+
+    public static Path debugDirectoryPath(Context context) {
+        return Path.of(context.getFilesDir().getAbsolutePath(), "debug");
+    }
+
+    public static Path virtFusionRefreshDebugDirectoryPath(Context context) {
+        return debugDirectoryPath(context).resolve("virtfusion-refresh");
+    }
 }

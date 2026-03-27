@@ -4,6 +4,7 @@ import java.time.Instant
 
 enum class ProviderFamily {
     VIRT_FUSION,
+    EXAMPLE,
     UNKNOWN,
 }
 
@@ -57,4 +58,16 @@ data class ResourceSnapshot(
     val resourceKind: ResourceKind,
     val collectedAt: Instant,
     val metrics: List<Metric>,
-)
+    val siteId: String = "",
+    val siteDisplayName: String = "",
+) {
+    val scopedResourceId: String
+        get() = if (siteId.isBlank()) resourceId else "$siteId::$resourceId"
+
+    fun withSiteProfile(siteProfile: SiteProfile): ResourceSnapshot =
+        copy(
+            providerFamily = siteProfile.providerFamily,
+            siteId = siteProfile.id,
+            siteDisplayName = siteProfile.displayName,
+        )
+}

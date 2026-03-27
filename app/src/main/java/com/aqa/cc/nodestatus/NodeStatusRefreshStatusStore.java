@@ -12,8 +12,8 @@ public final class NodeStatusRefreshStatusStore {
     private static final String KEY_LAST_SOURCE = "last_source";
     private static final String KEY_LAST_SUCCESS = "last_success";
     private static final String KEY_LAST_PENDING = "last_pending";
-    private static final String KEY_LAST_USED_TOKEN = "last_used_token";
     private static final String KEY_LAST_USED_SESSION = "last_used_session";
+    private static final String KEY_LAST_DETAILS = "last_details";
 
     private final SharedPreferences preferences;
 
@@ -27,6 +27,7 @@ public final class NodeStatusRefreshStatusStore {
                 .putString(KEY_LAST_MESSAGE, message)
                 .putString(KEY_LAST_UPDATED_AT, updatedAt)
                 .putBoolean(KEY_LAST_PENDING, true)
+                .remove(KEY_LAST_DETAILS)
                 .apply();
     }
 
@@ -34,7 +35,6 @@ public final class NodeStatusRefreshStatusStore {
             String source,
             String message,
             String updatedAt,
-            boolean usedToken,
             boolean usedSession
     ) {
         preferences.edit()
@@ -43,18 +43,23 @@ public final class NodeStatusRefreshStatusStore {
                 .putString(KEY_LAST_UPDATED_AT, updatedAt)
                 .putBoolean(KEY_LAST_SUCCESS, true)
                 .putBoolean(KEY_LAST_PENDING, false)
-                .putBoolean(KEY_LAST_USED_TOKEN, usedToken)
                 .putBoolean(KEY_LAST_USED_SESSION, usedSession)
+                .remove(KEY_LAST_DETAILS)
                 .apply();
     }
 
     public void saveFailure(String source, String message, String updatedAt) {
+        saveFailure(source, message, updatedAt, null);
+    }
+
+    public void saveFailure(String source, String message, String updatedAt, @Nullable String details) {
         preferences.edit()
                 .putString(KEY_LAST_SOURCE, source)
                 .putString(KEY_LAST_MESSAGE, message)
                 .putString(KEY_LAST_UPDATED_AT, updatedAt)
                 .putBoolean(KEY_LAST_SUCCESS, false)
                 .putBoolean(KEY_LAST_PENDING, false)
+                .putString(KEY_LAST_DETAILS, details)
                 .apply();
     }
 
@@ -72,8 +77,8 @@ public final class NodeStatusRefreshStatusStore {
                 updatedAt,
                 preferences.getBoolean(KEY_LAST_SUCCESS, false),
                 preferences.getBoolean(KEY_LAST_PENDING, false),
-                preferences.getBoolean(KEY_LAST_USED_TOKEN, false),
-                preferences.getBoolean(KEY_LAST_USED_SESSION, false)
+                preferences.getBoolean(KEY_LAST_USED_SESSION, false),
+                preferences.getString(KEY_LAST_DETAILS, null)
         );
     }
 
@@ -83,8 +88,9 @@ public final class NodeStatusRefreshStatusStore {
         private final String updatedAt;
         private final boolean success;
         private final boolean pending;
-        private final boolean usedToken;
         private final boolean usedCompatibilitySession;
+        @Nullable
+        private final String details;
 
         public RefreshStatus(
                 String source,
@@ -92,16 +98,16 @@ public final class NodeStatusRefreshStatusStore {
                 String updatedAt,
                 boolean success,
                 boolean pending,
-                boolean usedToken,
-                boolean usedCompatibilitySession
+                boolean usedCompatibilitySession,
+                @Nullable String details
         ) {
             this.source = source;
             this.message = message;
             this.updatedAt = updatedAt;
             this.success = success;
             this.pending = pending;
-            this.usedToken = usedToken;
             this.usedCompatibilitySession = usedCompatibilitySession;
+            this.details = details;
         }
 
         public String getSource() {
@@ -124,12 +130,13 @@ public final class NodeStatusRefreshStatusStore {
             return pending;
         }
 
-        public boolean isUsedToken() {
-            return usedToken;
-        }
-
         public boolean isUsedCompatibilitySession() {
             return usedCompatibilitySession;
+        }
+
+        @Nullable
+        public String getDetails() {
+            return details;
         }
     }
 }

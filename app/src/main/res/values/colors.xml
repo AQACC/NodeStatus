@@ -1,11 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="slate_950">#0F172A</color>
-    <color name="slate_800">#1F2937</color>
-    <color name="slate_200">#E2E8F0</color>
-    <color name="sky_500">#0EA5E9</color>
-    <color name="sky_700">#0369A1</color>
-    <color name="mint_500">#14B8A6</color>
-    <color name="black">#FF000000</color>
+    <color name="sand_50">#F5F0E6</color>
+    <color name="paper_50">#FFFDF8</color>
+    <color name="paper_100">#F6F1E8</color>
+    <color name="ink_950">#132128</color>
+    <color name="ink_700">#324751</color>
+    <color name="ink_500">#627985</color>
+    <color name="mist_200">#D7E0E4</color>
+    <color name="mist_400">#9EB0B8</color>
+    <color name="teal_950">#0E2E35</color>
+    <color name="teal_900">#103D45</color>
+    <color name="teal_800">#145964</color>
+    <color name="teal_700">#1D6F77</color>
+    <color name="teal_500">#2D9B95</color>
+    <color name="teal_300">#90D6CB</color>
+    <color name="blue_700">#295E8F</color>
+    <color name="blue_500">#4A93C7</color>
+    <color name="green_700">#2F6D5D</color>
+    <color name="green_500">#53A386</color>
+    <color name="amber_500">#D6923B</color>
+    <color name="coral_700">#9A4E3C</color>
+    <color name="night_950">#0F1A20</color>
+    <color name="night_850">#182730</color>
+    <color name="night_750">#243947</color>
+    <color name="night_650">#36505F</color>
     <color name="white">#FFFFFFFF</color>
 </resources>

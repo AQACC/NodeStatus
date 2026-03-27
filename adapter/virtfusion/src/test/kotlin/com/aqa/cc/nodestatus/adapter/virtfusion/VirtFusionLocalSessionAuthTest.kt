@@ -74,4 +74,29 @@ class VirtFusionLocalSessionAuthTest {
 
         assertFalse(auth.allowInsecureTls)
     }
+
+    @Test
+    fun loader_allows_missing_xsrf_header_and_omits_request_header() {
+        val authFile = Files.createTempFile("nodestatus-virtfusion-auth", ".properties")
+        Files.writeString(
+            authFile,
+            """
+            virtfusion.base_url=https://panel.example.invalid
+            virtfusion.cookie_header=XSRF-TOKEN=test-cookie; virtfusion_session=test-session
+            """.trimIndent(),
+        )
+
+        val auth = VirtFusionLocalSessionAuthLoader.load(authFile)
+        val request = auth.newAuthorizedGet(
+            uri = auth.serverListUri(),
+            referer = auth.dashboardReferer(),
+        )
+
+        assertEquals("", auth.xsrfHeader)
+        assertFalse(request.headers.containsKey("X-XSRF-TOKEN"))
+        assertEquals(
+            "XSRF-TOKEN=test-cookie; virtfusion_session=test-session",
+            request.headers["Cookie"],
+        )
+    }
 }

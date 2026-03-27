@@ -23,6 +23,13 @@ class FileSnapshotHistoryStore(
 
     fun listHistory(resourceId: String, limit: Int): List<ResourceSnapshot> =
         listHistory()
-            .filter { it.resourceId == resourceId }
+            .filter { matchesRequestedResource(it, resourceId) }
             .takeLast(limit)
+}
+
+private fun matchesRequestedResource(snapshot: ResourceSnapshot, requestedResourceId: String): Boolean {
+    if (snapshot.scopedResourceId == requestedResourceId || snapshot.resourceId == requestedResourceId) {
+        return true
+    }
+    return snapshot.siteId.isBlank() && requestedResourceId.endsWith("::${snapshot.resourceId}")
 }

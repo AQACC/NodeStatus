@@ -12,22 +12,11 @@ import androidx.work.OutOfQuotaPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
-import com.aqa.cc.nodestatus.adapter.virtfusion.VirtFusionApiTokenAuth;
-import com.aqa.cc.nodestatus.adapter.virtfusion.VirtFusionApiTokenClient;
-import com.aqa.cc.nodestatus.adapter.virtfusion.VirtFusionLocalSessionAuth;
-import com.aqa.cc.nodestatus.adapter.virtfusion.VirtFusionSessionClient;
-import com.aqa.cc.nodestatus.core.model.Metric;
-import com.aqa.cc.nodestatus.core.model.ProviderFamily;
-import com.aqa.cc.nodestatus.core.model.ResourceKind;
 import com.aqa.cc.nodestatus.core.model.ResourceSnapshot;
-import com.aqa.cc.nodestatus.core.storage.FileSnapshotHistoryStore;
-import com.aqa.cc.nodestatus.core.storage.FileSnapshotStore;
+import com.aqa.cc.nodestatus.core.model.SiteProfile;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public final class NodeStatusRefreshCoordinator {
@@ -43,70 +32,66 @@ public final class NodeStatusRefreshCoordinator {
     @NonNull
     public static RefreshOutcome refresh(
             @NonNull Context context,
-            @NonNull VirtFusionSessionConfig config,
+            @NonNull ProviderRefreshConfig config,
             @NonNull String source
     ) {
-        new NodeStatusRefreshStatusStore(context).savePending(
-                source,
-                "Refresh in progress.",
-                Instant.now().toString()
-        );
-
-        String tokenProbeSummary = null;
-        List<ResourceSnapshot> tokenSnapshots = List.of();
-        List<ResourceSnapshot> sessionSnapshots = List.of();
-
-        if (config.hasApiToken()) {
-            VirtFusionApiTokenClient apiTokenClient = VirtFusionApiTokenClient.create(
-                    new VirtFusionApiTokenAuth(
-                            config.getApiBaseUrl(),
-                            config.getApiToken(),
-                            config.getUserAgent(),
-                            config.isAllowInsecureTls()
-                    )
-            );
-            tokenProbeSummary = apiTokenClient.probeConnection();
-            tokenSnapshots = apiTokenClient.fetchSnapshots(8, Instant.now());
-        }
-
-        if (config.hasCompatibilitySession()) {
-            VirtFusionSessionClient sessionClient = VirtFusionSessionClient.create(
-                    new VirtFusionLocalSessionAuth(
-                            config.getBaseUrl(),
-                            config.getCookieHeader(),
-                            config.getXsrfHeader(),
-                            config.getUserAgent(),
-                            config.isAllowInsecureTls()
-                    )
-            );
-            sessionSnapshots = sessionClient.fetchSnapshots(8, Instant.now());
-        }
-
-        List<ResourceSnapshot> snapshotsToStore = mergeSnapshots(tokenSnapshots, sessionSnapshots);
-        new FileSnapshotStore(AppSnapshotFiles.latestSnapshotPath(context)).saveAll(snapshotsToStore);
-        new FileSnapshotHistoryStore(AppSnapshotFiles.historySnapshotPath(context), 240).appendAll(snapshotsToStore);
-
-        RefreshOutcome outcome = new RefreshOutcome(
-                snapshotsToStore.size(),
-                tokenProbeSummary,
-                !tokenSnapshots.isEmpty(),
-                !sessionSnapshots.isEmpty()
-        );
-        new NodeStatusRefreshStatusStore(context).saveSuccess(
-                source,
-                outcome.toStatusMessage(),
-                Instant.now().toString(),
-                outcome.usedToken(),
-                outcome.usedCompatibilitySession()
-        );
-        NodeStatusNotificationHelper.maybeNotifyLowTraffic(context, config, snapshotsToStore);
-        NodeStatusWidgetProvider.refreshAll(context.getApplicationContext());
-        schedulePeriodicRefresh(context, config);
-        return outcome;
+        ActiveSiteSessionRepository siteSessionRepository = new ActiveSiteSessionRepository(context.getApplicationContext());
+        return refresh(context, siteSessionRepository.loadActiveSite(), config, source);
     }
 
-    public static void schedulePeriodicRefresh(@NonNull Context context, @NonNull VirtFusionSessionConfig config) {
-        if (!config.hasApiToken() && !config.hasCompatibilitySession()) {
+    @NonNull
+    public static RefreshOutcome refresh(
+            @NonNull Context context,
+            @NonNull SiteProfile siteProfile,
+            @NonNull ProviderRefreshConfig config,
+            @NonNull String source
+    ) {
+        return new NodeStatusRefreshService(
+                new AppProviderDescriptorRegistry(),
+                new AppRefreshDependencies(context)
+        ).refresh(siteProfile, config, source);
+    }
+
+    @NonNull
+    static RefreshOutcome refresh(
+            @NonNull ProviderRefreshConfig config,
+            @NonNull String source,
+            @NonNull RefreshDependencies dependencies
+    ) {
+        return refresh(
+                defaultSiteProfile(),
+                config,
+                new AppProviderDescriptorRegistry(),
+                source,
+                dependencies
+        );
+    }
+
+    @NonNull
+    static RefreshOutcome refresh(
+            @NonNull SiteProfile siteProfile,
+            @NonNull ProviderRefreshConfig config,
+            @NonNull ProviderDescriptorRegistry descriptorRegistry,
+            @NonNull String source,
+            @NonNull RefreshDependencies dependencies
+    ) {
+        return new NodeStatusRefreshService(
+                descriptorRegistry,
+                dependencies
+        ).refresh(siteProfile, config, source);
+    }
+
+    public static void reconcileRefreshWork(@NonNull Context context, @NonNull ProviderRefreshConfig config) {
+        if (config.hasRunnableAuth()) {
+            schedulePeriodicRefresh(context, config);
+            return;
+        }
+        cancelRefreshWork(context);
+    }
+
+    public static void schedulePeriodicRefresh(@NonNull Context context, @NonNull ProviderRefreshConfig config) {
+        if (!config.hasRunnableAuth()) {
+            cancelRefreshWork(context);
             return;
         }
 
@@ -129,8 +114,14 @@ public final class NodeStatusRefreshCoordinator {
         );
     }
 
-    public static void enqueueImmediateRefresh(@NonNull Context context, @NonNull VirtFusionSessionConfig config) {
-        if (!config.hasApiToken() && !config.hasCompatibilitySession()) {
+    public static void cancelRefreshWork(@NonNull Context context) {
+        WorkManager manager = WorkManager.getInstance(context.getApplicationContext());
+        manager.cancelUniqueWork(UNIQUE_ONE_TIME_WORK_NAME);
+        manager.cancelUniqueWork(UNIQUE_WORK_NAME);
+    }
+
+    public static void enqueueImmediateRefresh(@NonNull Context context, @NonNull ProviderRefreshConfig config) {
+        if (!config.hasRunnableAuth()) {
             return;
         }
 
@@ -151,95 +142,62 @@ public final class NodeStatusRefreshCoordinator {
     }
 
     @NonNull
-    private static List<ResourceSnapshot> mergeSnapshots(
-            @NonNull List<ResourceSnapshot> tokenSnapshots,
-            @NonNull List<ResourceSnapshot> sessionSnapshots
-    ) {
-        if (tokenSnapshots.isEmpty()) {
-            return sessionSnapshots;
-        }
-        if (sessionSnapshots.isEmpty()) {
-            return tokenSnapshots;
-        }
-
-        Map<String, ResourceSnapshot> sessionById = new LinkedHashMap<>();
-        for (ResourceSnapshot snapshot : sessionSnapshots) {
-            sessionById.put(snapshot.getResourceId(), snapshot);
-        }
-
-        List<ResourceSnapshot> merged = new ArrayList<>();
-        for (ResourceSnapshot tokenSnapshot : tokenSnapshots) {
-            ResourceSnapshot sessionSnapshot = sessionById.remove(tokenSnapshot.getResourceId());
-            if (sessionSnapshot == null) {
-                merged.add(tokenSnapshot);
-            } else {
-                merged.add(mergeSnapshot(tokenSnapshot, sessionSnapshot));
-            }
-        }
-        merged.addAll(sessionById.values());
-        return merged;
-    }
-
-    @NonNull
-    private static ResourceSnapshot mergeSnapshot(
-            @NonNull ResourceSnapshot tokenSnapshot,
-            @NonNull ResourceSnapshot sessionSnapshot
-    ) {
-        Map<String, Metric> mergedMetrics = new LinkedHashMap<>();
-        for (Metric metric : tokenSnapshot.getMetrics()) {
-            mergedMetrics.put(metric.getKey(), metric);
-        }
-        for (Metric metric : sessionSnapshot.getMetrics()) {
-            mergedMetrics.put(metric.getKey(), metric);
-        }
-
-        return new ResourceSnapshot(
-                tokenSnapshot.getResourceId(),
-                sessionSnapshot.getDisplayName(),
-                ProviderFamily.VIRT_FUSION,
-                ResourceKind.VIRTUAL_MACHINE,
-                sessionSnapshot.getCollectedAt(),
-                new ArrayList<>(mergedMetrics.values())
+    private static SiteProfile defaultSiteProfile() {
+        return new SiteProfile(
+                SiteCatalogStore.DEFAULT_SITE_ID,
+                "VirtFusion",
+                "",
+                com.aqa.cc.nodestatus.core.model.ProviderFamily.VIRT_FUSION
         );
     }
 
     public static final class RefreshOutcome {
         private final int snapshotCount;
-        private final String tokenProbeSummary;
-        private final boolean usedToken;
-        private final boolean usedCompatibilitySession;
 
-        public RefreshOutcome(int snapshotCount, String tokenProbeSummary, boolean usedToken, boolean usedCompatibilitySession) {
+        public RefreshOutcome(int snapshotCount) {
             this.snapshotCount = snapshotCount;
-            this.tokenProbeSummary = tokenProbeSummary;
-            this.usedToken = usedToken;
-            this.usedCompatibilitySession = usedCompatibilitySession;
         }
 
         public int getSnapshotCount() {
             return snapshotCount;
         }
 
-        public String getTokenProbeSummary() {
-            return tokenProbeSummary;
-        }
-
-        public boolean usedToken() {
-            return usedToken;
-        }
-
         public boolean usedCompatibilitySession() {
-            return usedCompatibilitySession;
+            return true;
         }
 
         public String toStatusMessage() {
-            if (usedToken && usedCompatibilitySession) {
-                return "Saved " + snapshotCount + " snapshot(s) using API token plus compatibility session.";
-            }
-            if (usedToken) {
-                return "Saved " + snapshotCount + " snapshot(s) using API token.";
-            }
-            return "Saved " + snapshotCount + " snapshot(s) using compatibility session.";
+            return snapshotCount == 1
+                    ? "Saved 1 snapshot using compatibility session."
+                    : "Saved " + snapshotCount + " snapshots using compatibility session.";
         }
+    }
+
+    interface RefreshDependencies {
+        @NonNull Instant now();
+
+        void savePending(@NonNull String source, @NonNull String message, @NonNull String updatedAt);
+
+        void saveSuccess(
+                @NonNull String source,
+                @NonNull String message,
+                @NonNull String updatedAt,
+                boolean usedSession
+        );
+
+        default void saveLatestSnapshots(@NonNull SiteProfile siteProfile, @NonNull List<ResourceSnapshot> snapshots) {
+            saveLatestSnapshots(snapshots);
+        }
+
+        default void saveLatestSnapshots(@NonNull List<ResourceSnapshot> snapshots) {
+        }
+
+        void appendHistorySnapshots(@NonNull List<ResourceSnapshot> snapshots);
+
+        void notifyLowTraffic(@NonNull ProviderRefreshConfig config, @NonNull List<ResourceSnapshot> snapshots);
+
+        void refreshWidgets();
+
+        void reconcileRefreshWork(@NonNull ProviderRefreshConfig config);
     }
 }

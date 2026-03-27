@@ -28,14 +28,16 @@ data class VirtFusionLocalSessionAuth(
     fun newAuthorizedGet(uri: URI, referer: String): VirtFusionHttpRequest =
         VirtFusionHttpRequest(
             uri = uri,
-            headers = mapOf(
-                "Accept" to "application/json, text/plain, */*",
-                "Cookie" to cookieHeader,
-                "Referer" to referer,
-                "User-Agent" to userAgent,
-                "X-Requested-With" to "XMLHttpRequest",
-                "X-XSRF-TOKEN" to xsrfHeader,
-            ),
+            headers = buildMap {
+                put("Accept", "application/json, text/plain, */*")
+                put("Cookie", cookieHeader)
+                put("Referer", referer)
+                put("User-Agent", userAgent)
+                put("X-Requested-With", "XMLHttpRequest")
+                if (xsrfHeader.isNotBlank()) {
+                    put("X-XSRF-TOKEN", xsrfHeader)
+                }
+            },
         )
 
     companion object {
@@ -55,7 +57,7 @@ object VirtFusionLocalSessionAuthLoader {
         return VirtFusionLocalSessionAuth(
             baseUrl = properties.requireValue("virtfusion.base_url"),
             cookieHeader = properties.requireValue("virtfusion.cookie_header"),
-            xsrfHeader = properties.requireValue("virtfusion.x_xsrf_token"),
+            xsrfHeader = properties.getSanitizedProperty("virtfusion.x_xsrf_token")?.trim().orEmpty(),
             userAgent = properties.getProperty("virtfusion.user_agent")?.trim()
                 ?.takeIf { it.isNotBlank() }
                 ?: VirtFusionLocalSessionAuth.DEFAULT_USER_AGENT,

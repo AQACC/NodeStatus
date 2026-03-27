@@ -75,9 +75,17 @@ class UrlConnectionVirtFusionHttpTransport(
         private fun insecureSslContext(): SSLContext {
             val trustAll = arrayOf<TrustManager>(
                 object : X509TrustManager {
-                    override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) = Unit
+                    override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {
+                        require(!authType.isNullOrBlank()) { "Missing TLS auth type" }
+                        require(!chain.isNullOrEmpty()) { "Missing client certificate chain" }
+                        chain.forEach { it.checkValidity() }
+                    }
 
-                    override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) = Unit
+                    override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {
+                        require(!authType.isNullOrBlank()) { "Missing TLS auth type" }
+                        require(!chain.isNullOrEmpty()) { "Missing server certificate chain" }
+                        chain.forEach { it.checkValidity() }
+                    }
 
                     override fun getAcceptedIssuers(): Array<X509Certificate> = emptyArray()
                 },
