@@ -1,0 +1,63 @@
+name: Bug Report
+description: Report a problem or regression in NodeStatus.
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve NodeStatus.
+        For security issues, follow SECURITY.md instead of filing a public issue.
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: One sentence summary of the issue.
+      placeholder: "Widget shows stale data after refresh"
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: What is broken or incorrect for users?
+      placeholder: "Dashboard stays on old snapshot"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Provide minimal steps to reproduce.
+      placeholder: "1. Configure provider..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or Screenshots
+      description: Redact any credentials or customer-identifying data.
+    validations:
+      required: false
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Android version, app build, or branch.
+      placeholder: "Android 15, Pixel 8, main"
+    validations:
+      required: false

@@ -1,0 +1,13 @@
+name: DCO
+
+on:
+  pull_request:
+
+jobs:
+  dco:
+    runs-on: ubuntu-latest
+    steps:
+      - name: DCO Check
+        uses: christophebedard/dco-check@v1
+        with:
+          require_signoff: true

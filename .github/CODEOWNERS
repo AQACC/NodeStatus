@@ -1,0 +1,14 @@
+# Default owner for all files.
+# Update this handle if the repository owner is different.
+* @aqacc
+
+# Security and governance files.
+/SECURITY.md @aqacc
+/CODE_OF_CONDUCT.md @aqacc
+/GOVERNANCE.md @aqacc
+/.github/ @aqacc
+
+# High-risk areas.
+/adapter/ @aqacc
+/rule-packs/ @aqacc
+/docs/ @aqacc

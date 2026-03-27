@@ -1,0 +1,45 @@
+name: Feature Request
+description: Suggest a new capability or improvement.
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to propose improvements.
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: What do you want to see added?
+      placeholder: "Support a new provider family"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Solution
+      description: Outline a possible approach or changes.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Optional alternatives or workarounds.
+    validations:
+      required: false
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional Context
+      description: Links, screenshots, or references.
+    validations:
+      required: false
