@@ -2,6 +2,22 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
+fun optionalTextConfig(gradleKey: String, envKey: String): String? {
+    return providers.gradleProperty(gradleKey).orNull
+        ?: providers.environmentVariable(envKey).orNull
+}
+
+fun intConfig(gradleKey: String, envKey: String, defaultValue: Int): Int {
+    val rawValue = optionalTextConfig(gradleKey, envKey) ?: return defaultValue
+    return rawValue.toIntOrNull()
+        ?: error("$gradleKey / $envKey must be an integer, got '$rawValue'")
+}
+
+val releaseVersionName = optionalTextConfig("nodestatusVersionName", "NODESTATUS_VERSION_NAME")
+    ?.removePrefix("v")
+    ?: "1.0"
+val releaseVersionCode = intConfig("nodestatusVersionCode", "NODESTATUS_VERSION_CODE", 1)
+
 android {
     namespace = "com.aqa.cc.nodestatus"
     compileSdk {
@@ -14,8 +30,8 @@ android {
         applicationId = "com.aqa.cc.nodestatus"
         minSdk = 34
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = releaseVersionCode
+        versionName = releaseVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

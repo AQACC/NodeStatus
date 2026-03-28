@@ -100,7 +100,8 @@ or API tokens.
 
 See [CHANGELOG.md](CHANGELOG.md) for release history and
 [docs/repository-setup.md](docs/repository-setup.md) for first-push,
-branch-protection, and security setup steps.
+branch-protection, and security setup steps, and
+[docs/release-process.md](docs/release-process.md) for signed APK release automation.
 
 ## License
 

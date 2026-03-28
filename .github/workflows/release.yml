@@ -1,0 +1,190 @@
+name: Release APK
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Derive release metadata
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tag="${GITHUB_REF_NAME}"
+          version_name="${tag#v}"
+
+          if [[ ! "$version_name" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-((alpha|beta|rc))\.([0-9]+))?$ ]]; then
+            echo "Tag '$tag' must look like vMAJOR.MINOR.PATCH or vMAJOR.MINOR.PATCH-beta.N" >&2
+            exit 1
+          fi
+
+          major="${BASH_REMATCH[1]}"
+          minor="${BASH_REMATCH[2]}"
+          patch="${BASH_REMATCH[3]}"
+          channel="${BASH_REMATCH[6]:-}"
+          prerelease_number="${BASH_REMATCH[7]:-0}"
+          prerelease=false
+          suffix=99
+
+          if (( minor > 99 || patch > 99 )); then
+            echo "Minor and patch versions must stay below 100 for the current versionCode scheme." >&2
+            exit 1
+          fi
+
+          case "$channel" in
+            alpha)
+              prerelease=true
+              if (( prerelease_number < 1 || prerelease_number > 29 )); then
+                echo "alpha prerelease number must be between 1 and 29." >&2
+                exit 1
+              fi
+              suffix=$((20 + prerelease_number))
+              ;;
+            beta)
+              prerelease=true
+              if (( prerelease_number < 1 || prerelease_number > 29 )); then
+                echo "beta prerelease number must be between 1 and 29." >&2
+                exit 1
+              fi
+              suffix=$((50 + prerelease_number))
+              ;;
+            rc)
+              prerelease=true
+              if (( prerelease_number < 1 || prerelease_number > 19 )); then
+                echo "rc prerelease number must be between 1 and 19." >&2
+                exit 1
+              fi
+              suffix=$((80 + prerelease_number))
+              ;;
+            "")
+              ;;
+            *)
+              echo "Unsupported prerelease channel '$channel'." >&2
+              exit 1
+              ;;
+          esac
+
+          version_code=$(( major * 1000000 + minor * 10000 + patch * 100 + suffix ))
+          artifact_basename="NodeStatus-v${version_name}-release"
+
+          echo "version_name=$version_name" >> "$GITHUB_OUTPUT"
+          echo "version_code=$version_code" >> "$GITHUB_OUTPUT"
+          echo "prerelease=$prerelease" >> "$GITHUB_OUTPUT"
+          echo "artifact_basename=$artifact_basename" >> "$GITHUB_OUTPUT"
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Install SDK packages
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Materialize release keystore
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${ANDROID_KEYSTORE_BASE64}" ]]; then
+            echo "Missing required secret ANDROID_KEYSTORE_BASE64." >&2
+            exit 1
+          fi
+
+          echo "${ANDROID_KEYSTORE_BASE64}" | base64 --decode > "${RUNNER_TEMP}/release-keystore.jks"
+
+      - name: Build unsigned release APK
+        env:
+          NODESTATUS_VERSION_NAME: ${{ steps.meta.outputs.version_name }}
+          NODESTATUS_VERSION_CODE: ${{ steps.meta.outputs.version_code }}
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon :app:assembleRelease
+
+      - name: Sign release APK
+        shell: bash
+        env:
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ARTIFACT_BASENAME: ${{ steps.meta.outputs.artifact_basename }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${ANDROID_KEY_ALIAS}" || -z "${ANDROID_KEY_PASSWORD}" || -z "${ANDROID_KEYSTORE_PASSWORD}" ]]; then
+            echo "Missing release signing secrets." >&2
+            exit 1
+          fi
+
+          unsigned_apk="app/build/outputs/apk/release/app-release-unsigned.apk"
+          signed_dir="dist"
+          signed_apk="${signed_dir}/${ARTIFACT_BASENAME}.apk"
+          checksum_file="${signed_apk}.sha256"
+          apksigner="${ANDROID_HOME}/build-tools/36.0.0/apksigner"
+
+          mkdir -p "${signed_dir}"
+
+          "${apksigner}" sign \
+            --ks "${RUNNER_TEMP}/release-keystore.jks" \
+            --ks-key-alias "${ANDROID_KEY_ALIAS}" \
+            --ks-pass "pass:${ANDROID_KEYSTORE_PASSWORD}" \
+            --key-pass "pass:${ANDROID_KEY_PASSWORD}" \
+            --out "${signed_apk}" \
+            "${unsigned_apk}"
+
+          "${apksigner}" verify --verbose "${signed_apk}"
+          sha256sum "${signed_apk}" > "${checksum_file}"
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.meta.outputs.artifact_basename }}
+          path: dist/*
+
+      - name: Create or update draft release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_BASENAME: ${{ steps.meta.outputs.artifact_basename }}
+          PRERELEASE: ${{ steps.meta.outputs.prerelease }}
+          VERSION_NAME: ${{ steps.meta.outputs.version_name }}
+        run: |
+          set -euo pipefail
+
+          tag="${GITHUB_REF_NAME}"
+          signed_apk="dist/${ARTIFACT_BASENAME}.apk"
+          checksum_file="${signed_apk}.sha256"
+          title="NodeStatus ${VERSION_NAME}"
+
+          if gh release view "${tag}" >/dev/null 2>&1; then
+            gh release upload "${tag}" "${signed_apk}" "${checksum_file}" --clobber
+            exit 0
+          fi
+
+          release_flags=(--draft --generate-notes --title "${title}")
+          if [[ "${PRERELEASE}" == "true" ]]; then
+            release_flags+=(--prerelease)
+          fi
+
+          gh release create "${tag}" "${signed_apk}" "${checksum_file}" "${release_flags[@]}"
