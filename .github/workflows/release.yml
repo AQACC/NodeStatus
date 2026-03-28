@@ -162,7 +162,7 @@ jobs:
           name: ${{ steps.meta.outputs.artifact_basename }}
           path: dist/*
 
-      - name: Create or update draft release
+      - name: Create or update public release
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -182,7 +182,7 @@ jobs:
             exit 0
           fi
 
-          release_flags=(--draft --generate-notes --title "${title}")
+          release_flags=(--generate-notes --title "${title}")
           if [[ "${PRERELEASE}" == "true" ]]; then
             release_flags+=(--prerelease)
           fi
