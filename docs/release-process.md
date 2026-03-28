@@ -11,9 +11,9 @@ The workflow will:
 - build the `release` APK
 - sign it with your repository secrets
 - generate a `.sha256` checksum file
-- create a draft GitHub Release and upload both files
+- create a public GitHub Release and upload both files
 
-The release stays in `draft` state so you can review the notes and asset names before publishing.
+Pre-release tags such as `-alpha.N`, `-beta.N`, and `-rc.N` are published as GitHub prereleases.
 
 ## Supported tags
 
@@ -82,11 +82,11 @@ git push origin v0.1.0-beta.1
 ```
 
 5. Wait for the `Release APK` workflow to finish.
-6. Open the generated draft release, review the notes, then publish it.
+6. Open the generated release page and verify the uploaded APK and checksum.
 
 ## If the workflow fails
 
 - Confirm all four signing secrets exist and are non-empty.
 - Confirm the tag matches one of the supported formats.
 - Re-run the failed workflow after fixing secrets or tag issues.
-- If you need to rebuild the same tag, re-run the workflow; the draft release assets are uploaded with `--clobber`.
+- If you need to rebuild the same tag, re-run the workflow; the release assets are uploaded with `--clobber`.
