@@ -44,6 +44,23 @@ Rule-pack contributions:
 git commit -s
 ```
 
+## Line endings on Windows
+
+- Treat `.gitattributes` as the source of truth for line endings.
+- Keep `*.bat` and `*.cmd` files as CRLF. Most other text files in the repository should remain LF.
+- Do not open a PR with a wrapper-script diff unless you intended to change the script contents.
+- If `gradlew.bat` shows as modified unexpectedly, verify the diff first:
+
+```text
+git diff --ignore-cr-at-eol -- gradlew.bat
+```
+
+- If the file only needs normalization, restage it with:
+
+```text
+git add --renormalize gradlew.bat
+```
+
 ## Out of scope for community plugins
 
 The Android client must not execute arbitrary third-party code.
