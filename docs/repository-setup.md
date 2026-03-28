@@ -41,6 +41,7 @@ For the `main` branch, enable these rules:
 - Keep `CHANGELOG.md` updated from `Unreleased`
 - Treat all releases before 1.0 as potentially breaking
 - Tag only commits that pass `./gradlew test lint assembleDebug`
+- Follow [docs/release-process.md](release-process.md) when publishing signed APKs to GitHub Releases
 
 ## CI Stability
 
