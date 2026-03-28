@@ -1,5 +1,10 @@
 name: DCO
 
+permissions:
+  contents: read
+  pull-requests: read
+
+
 on:
   pull_request:
 
