@@ -15,7 +15,7 @@ This project is pre-1.0 and under active design. Security-sensitive areas alread
 If you discover a security issue, do not open a public issue with exploit details.
 Send a private report through GitHub Security Advisories:
 
-https://github.com/aqacc/NodeStatus/security/advisories/new
+https://github.com/AQACC/NodeStatus/security/advisories/new
 
 If the final repository name differs from `NodeStatus`, update this advisory URL
 and `.github/ISSUE_TEMPLATE/config.yml` together.

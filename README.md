@@ -1,6 +1,6 @@
 # NodeStatus
 
-![Android CI](https://github.com/aqacc/NodeStatus/actions/workflows/android.yml/badge.svg)
+![Android CI](https://github.com/AQACC/NodeStatus/actions/workflows/android.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 NodeStatus is an Android configuration center for panel-based infrastructure monitoring.
