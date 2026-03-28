@@ -64,6 +64,7 @@ macOS/Linux:
 - New adapters should start with sanitized fixtures and rule-pack documentation.
 - Widget and notification surfaces must read cached snapshots, not direct network calls.
 - Community contributions should favor declarative rule packs over runtime-executed third-party code.
+- Respect `.gitattributes` line endings: `*.bat` and `*.cmd` stay CRLF, while most other text files stay LF.
 
 ## CI notes
 
