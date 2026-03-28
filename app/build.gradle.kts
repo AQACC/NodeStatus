@@ -28,7 +28,7 @@ android {
 
     defaultConfig {
         applicationId = "com.aqa.cc.nodestatus"
-        minSdk = 34
+        minSdk = 28
         targetSdk = 36
         versionCode = releaseVersionCode
         versionName = releaseVersionName
