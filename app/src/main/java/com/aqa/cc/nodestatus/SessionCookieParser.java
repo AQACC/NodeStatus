@@ -40,6 +40,10 @@ final class SessionCookieParser {
         if (encodedValue == null || encodedValue.isBlank()) {
             return "";
         }
-        return URLDecoder.decode(encodedValue, StandardCharsets.UTF_8);
+        try {
+            return URLDecoder.decode(encodedValue, StandardCharsets.UTF_8.name());
+        } catch (java.io.UnsupportedEncodingException exception) {
+            throw new IllegalStateException("UTF-8 must be available on Android.", exception);
+        }
     }
 }

@@ -13,3 +13,4 @@ Semantic Versioning once it reaches 1.0.
 - Document governance, contribution flow, and security reporting.
 - Expand VirtFusion adapter capabilities and UI surfaces.
 - Lower Android minimum SDK from 34 to 28 for broader test-device support.
+- Fix Android 9-13 startup compatibility issues introduced by the lower min SDK build.
