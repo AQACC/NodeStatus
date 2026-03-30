@@ -7,6 +7,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Handler;
 import android.widget.Button;
 import android.widget.TextView;
@@ -194,6 +195,9 @@ final class RefreshFlowController {
 
     private void maybeRequestNotificationPermission(ProviderSessionConfig config) {
         if (!config.isNotificationsEnabled()) {
+            return;
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             return;
         }
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.POST_NOTIFICATIONS)
